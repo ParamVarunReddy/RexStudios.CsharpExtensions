@@ -56,6 +56,44 @@ namespace RexStudios.CsharpExtensions
         {
             return (context.InputParameters.Contains("RelatedEntities") && context.InputParameters["RelatedEntities"] is EntityReferenceCollection) ? (EntityReferenceCollection)context.InputParameters["RelatedEntities"] : null;
         }
+        
+         public static ExecuteMultipleResponse ExecuteMultiple(this ExecuteMultipleRequest request, IOrganizationService service, ITracingService tracingService)
+        {
+            try
+            {
+                var response = (ExecuteMultipleResponse)service.Execute(request);
+
+                // Check the responses for any errors
+                foreach (var responseItem in response.Responses)
+                {
+                    if (responseItem.Fault != null)
+                    {
+                        // Throw an exception to handle the error
+                        throw new Exception(responseItem.Fault.Message);
+                    }
+                }
+                return response;
+            }
+
+            catch (FaultException<OrganizationServiceFault> ex)
+            {
+                tracingService?.Trace($"Error thrown at Execute Multiple Resposne, {ex.Message}");
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                tracingService?.Trace($"Error thrown at Execute Multiple Resposne, {ex.Message}");
+                throw ex;
+            }
+        }
+
+        public static ExecuteMultipleRequest AddRequests(this ExecuteMultipleRequest request, IEnumerable<OrganizationRequest> requests)
+        {
+            var orgReqCollection = new OrganizationRequestCollection();
+            orgReqCollection.AddRange(requests);
+            request.Requests = orgReqCollection;
+            return request;
+        }
     }
 
     public static class CrmHelperExtensions
