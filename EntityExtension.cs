@@ -5,7 +5,9 @@
 namespace RexStudios.CsharpExtensions
 {
     using Microsoft.Xrm.Sdk;
+    using Microsoft.Xrm.Sdk.Messages;
     using System;
+    using System.ServiceModel;
     using System.Collections.Generic;
 
     public static class EntityExtension
@@ -56,8 +58,8 @@ namespace RexStudios.CsharpExtensions
         {
             return (context.InputParameters.Contains("RelatedEntities") && context.InputParameters["RelatedEntities"] is EntityReferenceCollection) ? (EntityReferenceCollection)context.InputParameters["RelatedEntities"] : null;
         }
-        
-         public static ExecuteMultipleResponse ExecuteMultiple(this ExecuteMultipleRequest request, IOrganizationService service, ITracingService tracingService)
+
+        public static ExecuteMultipleResponse ExecuteMultiple(this ExecuteMultipleRequest request, IOrganizationService service, ITracingService tracingService)
         {
             try
             {
@@ -94,16 +96,18 @@ namespace RexStudios.CsharpExtensions
             request.Requests = orgReqCollection;
             return request;
         }
-        
+
         public static OrganizationResponse ExecuteCustomAction(this IOrganizationService service, string customActionName, Dictionary<string, object> inputs)
-    {
-        var request = new OrganizationRequest(customActionName);
-        foreach (var input in inputs)
         {
-            request.Parameters.Add(input.Key, input.Value);
+            var request = new OrganizationRequest(customActionName);
+            foreach (var input in inputs)
+            {
+                request.Parameters.Add(input.Key, input.Value);
+            }
+            return service.Execute(request);
         }
-        return service.Execute(request);
-    }
+
+
     }
 
     public static class CrmHelperExtensions
