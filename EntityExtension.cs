@@ -94,6 +94,16 @@ namespace RexStudios.CsharpExtensions
             request.Requests = orgReqCollection;
             return request;
         }
+        
+        public static OrganizationResponse ExecuteCustomAction(this IOrganizationService service, string customActionName, Dictionary<string, object> inputs)
+    {
+        var request = new OrganizationRequest(customActionName);
+        foreach (var input in inputs)
+        {
+            request.Parameters.Add(input.Key, input.Value);
+        }
+        return service.Execute(request);
+    }
     }
 
     public static class CrmHelperExtensions
